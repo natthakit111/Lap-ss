@@ -1,0 +1,151 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct studentNode {
+    char name[20];
+    int age;
+    char sex;
+    float gpa;
+    struct studentNode *next;
+    struct studentNode *back;
+};
+
+// Function prototypes
+struct studentNode *AddNode(struct studentNode **start, char name[], int age, char sex, float gpa);
+void InsNode(struct studentNode *now, char name[], int age, char sex, float gpa);
+void DelNode(struct studentNode **start, struct studentNode **now);
+void GoBack(struct studentNode **now);
+void ShowAll(struct studentNode *walk);
+
+int main() {
+    struct studentNode *start = NULL;
+    struct studentNode *now = NULL;
+
+    now = AddNode(&start, "one", 6, 'M', 3.11);
+    ShowAll(start);
+
+    now = AddNode(&start, "two", 8, 'F', 3.22);
+    ShowAll(start);
+
+    InsNode(now, "three", 10, 'M', 3.33);
+    ShowAll(start);
+
+    InsNode(now, "four", 12, 'F', 3.44);
+    ShowAll(start);
+
+    GoBack(&now);
+    DelNode(&start, &now);
+    ShowAll(start);
+
+    DelNode(&start, &now);
+    ShowAll(start);
+
+    DelNode(&start, &now);
+    ShowAll(start);
+
+    return 0;
+}
+
+// Function to add a new node at the end of the list
+struct studentNode *AddNode(struct studentNode **start, char name[], int age, char sex, float gpa) {
+    struct studentNode *newNode = (struct studentNode *)malloc(sizeof(struct studentNode));
+    if (newNode == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+
+    strcpy(newNode->name, name);
+    newNode->age = age;
+    newNode->sex = sex;
+    newNode->gpa = gpa;
+    newNode->next = NULL;
+    newNode->back = NULL;
+
+    if (*start == NULL) {
+        *start = newNode;
+    } else {
+        struct studentNode *temp = *start;
+        while (temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->next = newNode;
+        newNode->back = temp;
+    }
+
+    return newNode;
+}
+
+// Function to insert a new node before the current node
+void InsNode(struct studentNode *now, char name[], int age, char sex, float gpa) {
+    if (now == NULL) {
+        printf("Error: Current node is NULL\n");
+        return;
+    }
+
+    struct studentNode *newNode = (struct studentNode *)malloc(sizeof(struct studentNode));
+    if (newNode == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+
+    strcpy(newNode->name, name);
+    newNode->age = age;
+    newNode->sex = sex;
+    newNode->gpa = gpa;
+
+    newNode->next = now;
+    newNode->back = now->back;
+
+    if (now->back != NULL) {
+        now->back->next = newNode;
+    }
+    now->back = newNode;
+
+    if (now->back == NULL) {
+        // Updating start if newNode is inserted at the beginning
+        while (now->back != NULL) {
+            now = now->back;
+        }
+    }
+}
+
+// Function to delete the current node
+void DelNode(struct studentNode **start, struct studentNode **now) {
+    if (*now == NULL) {
+        printf("Error: Current node is NULL\n");
+        return;
+    }
+
+    struct studentNode *temp = *now;
+    if (temp->back != NULL) {
+        temp->back->next = temp->next;
+    }
+    if (temp->next != NULL) {
+        temp->next->back = temp->back;
+    }
+
+    if (*start == temp) {
+        *start = temp->next;
+    }
+
+    *now = temp->next;
+
+    free(temp);
+}
+
+// Function to move the current node backward in the list
+void GoBack(struct studentNode **now) {
+    if (*now != NULL) {
+        *now = (*now)->back;
+    }
+}
+
+// Function to display all nodes in the list
+void ShowAll(struct studentNode *walk) {
+    while (walk != NULL) {
+        printf("%s ", walk->name);
+        walk = walk->next;
+    }
+    printf("\n");
+}
